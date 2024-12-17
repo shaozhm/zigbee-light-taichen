@@ -1,0 +1,4 @@
+address: sonos.local
+port: 1883
+topics:
+  - zigbee2mqtt/music-button

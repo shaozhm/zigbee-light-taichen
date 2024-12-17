@@ -1,0 +1,16 @@
+{
+  "name": "zigbee-music",
+  "version": "1.0.0",
+  "description": "for zigbee2mqtt",
+  "license": "MIT",
+  "main": "bin/main.js",
+  "bin": {
+    "zigbee-light": "bin/main.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.1.0",
+    "blynk-library": "0.5.4",
+    "lodash": "4.17.21",
+    "yaml": "2.2.1"
+  }
+}
