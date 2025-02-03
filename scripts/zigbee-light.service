@@ -1,12 +1,12 @@
 [Unit]
-Description=Zigbee Music
+Description=Zigbee Light [TaiChen]
 Requires=mosquitto.service
 After=zigbee2mqtt.service mosquitto.service
 After=network.target
 
 [Service]
-ExecStart=/home/pi/node-v20.18.0-linux-armv7l/bin/node .
-WorkingDirectory=/home/pi/zigbee-music
+ExecStart=/home/pi/node-v16.15.0-linux-armv7l/bin/node .
+WorkingDirectory=/home/pi/zigbee-light-taichen
 StandardOutput=inherit
 StandardError=inherit
 Restart=on-failure
