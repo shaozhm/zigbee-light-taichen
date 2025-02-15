@@ -4,3 +4,6 @@ topics:
   - zigbee2mqtt/music-button
   - zigbee2mqtt/move-sensor-1
   - zigbee2mqtt/ikea-styrbar-f-1
+  - zigbee2mqtt/ikea-styrbar-d-1
+  - zigbee2mqtt/ikea-styrbar-d-2
+  - zigbee2mqtt/ikea-styrbar-d-3

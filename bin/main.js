@@ -83,5 +83,60 @@ client.on('message', function(topic, message) {
         }
       })
     }
+
+    // 主卧窗帘
+    if (checkTopicProperty('ikea-styrbar-d-1', 'action') || 
+        checkTopicProperty('ikea-styrbar-d-2', 'action') ||
+        checkTopicProperty('ikea-styrbar-d-3', 'action')) {
+      console.log(topic, mesgJSON);
+      if (mesgJSON.action === 'arrow_left_click') {
+        // 关窗帘
+        console.log('curtain-1 is closing ... ...')
+        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
+        client.publish(curtainTopic, '{ "state": "close" }', { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
+      }
+      if (mesgJSON.action === 'arrow_right_') {
+        //  开窗帘
+        console.log('curtain-1 is opening ... ...')
+        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
+        client.publish(curtainTopic, '{ "state": "open" }', { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
+      }
+      if (mesgJSON.action === 'arrow_left_hold') {
+        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
+        console.log('curtain-1 is closing ... ...')
+        client.publish(curtainTopic, '{ "position": 0 }', { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
+      }
+      if (mesgJSON.action === 'arrow_right_hold') {
+        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
+        console.log('curtain-1 is opening ... ...')
+        client.publish(curtainTopic, '{ "position": 100 }', { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
+      }
+      if (mesgJSON.action === 'arrow_left_release' ||
+          mesgJSON.action === 'arrow_right_release') {
+        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
+        console.log('curtain-1 stop')
+        client.publish(curtainTopic, '{ "state": "stop" }', { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
+      }
+    }
   }
 });
