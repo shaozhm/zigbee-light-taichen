@@ -99,7 +99,7 @@ client.on('message', function(topic, message) {
           }
         })
       }
-      if (mesgJSON.action === 'arrow_right_') {
+      if (mesgJSON.action === 'arrow_right_click') {
         //  开窗帘
         console.log('curtain-1 is opening ... ...')
         const curtainTopic = 'zigbee2mqtt/curtain-1/set';
@@ -109,26 +109,8 @@ client.on('message', function(topic, message) {
           }
         })
       }
-      if (mesgJSON.action === 'arrow_left_hold') {
-        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
-        console.log('curtain-1 is closing ... ...')
-        client.publish(curtainTopic, '{ "position": 0 }', { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
-          }
-        })
-      }
-      if (mesgJSON.action === 'arrow_right_hold') {
-        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
-        console.log('curtain-1 is opening ... ...')
-        client.publish(curtainTopic, '{ "position": 100 }', { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
-          }
-        })
-      }
-      if (mesgJSON.action === 'arrow_left_release' ||
-          mesgJSON.action === 'arrow_right_release') {
+      if (mesgJSON.action === 'on' ||
+          mesgJSON.action === 'off') {
         const curtainTopic = 'zigbee2mqtt/curtain-1/set';
         console.log('curtain-1 stop')
         client.publish(curtainTopic, '{ "state": "stop" }', { qos: 0, retain: false }, (error) => {
