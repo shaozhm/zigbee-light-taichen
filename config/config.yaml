@@ -7,3 +7,10 @@ topics:
   - zigbee2mqtt/ikea-styrbar-d-1
   - zigbee2mqtt/ikea-styrbar-d-2
   - zigbee2mqtt/ikea-styrbar-d-3
+  - zigbee2mqtt/button-1
+  - zigbee2mqtt/button-2
+  - zigbee2mqtt/move-sensor-2
+  - zigbee2mqtt/door-2
+  - zigbee2mqtt/ceiling-3
+  - zigbee2mqtt/ceiling-4
+  - zigbee2mqtt/ikea-styrbar-g-1
