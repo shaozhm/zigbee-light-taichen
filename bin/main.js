@@ -48,9 +48,32 @@ let disableSensor2 = false;
 let keepLight2 = true;
 let door2contact = false;
 
+const fnLightControlMessage = (mesgJSON, topics_on, topics_off) => {
+  let state = null;
+  if (mesgJSON?.action?.toLowerCase() === 'on') {
+    state = 'on';
+  }
+  if (mesgJSON?.action?.toLowerCase() === 'off') {
+    state = 'off';
+  }
+  if (state) {
+    const message = state === 'on' ? '{ "state": "ON" }' : '{ "state": "OFF" }';
+    const topics = state === 'on' ? topics_on : topics_off;
+    topics.forEach((topic) => {
+      client.publish(topic, message, { qos: 0, retain: false }, (error) => {
+        if (error) {
+          console.error(error)
+        }
+      })
+    })
+  }
+  return state;
+}
+
 client.on('message', function(topic, message) {
   console.log(`[${topic}] message: `, message.toString());
   console.log(`KeepLight-1/Disable Sensor 1: `, keepLight1, disableSensor1);
+  console.log(`KeepLight-2/Disable Sensor 2: `, keepLight2, disableSensor2);
   if (topic.startsWith('zigbee2mqtt')) {
     console.log('button message', message.toString());
     const mesgJSON = JSON.parse(message.toString());
@@ -64,14 +87,22 @@ client.on('message', function(topic, message) {
       }
     };
 
+    const kitchen_topics_auto_on = [
+      'zigbee2mqtt/ikea-lightstrip-driver-1/set',
+    ];
+    const kitchen_topics = [
+      ...kitchen_topics_auto_on,
+      'zigbee2mqtt/ikea-lightstrip-driver-2/set',
+    ];
     // 厨房门口主开关
     if (checkTopicProperty('ikea-styrbar-f-1', 'action')) {
-      if (mesgJSON.action === 'on') {
+      const state = fnLightControlMessage(mesgJSON, kitchen_topics, kitchen_topics);
+      if (state === 'on') {
         keepLight1 = true;
         disableSensor1 = true;
         console.log(`Disable Sensor 1 set to: `, disableSensor1);
       }
-      if (mesgJSON.action === 'off') {
+      if (state === 'off') {
         keepLight1 = false;
         setTimeout(fnDisableSensor1Off, 3000);
       }
@@ -80,19 +111,24 @@ client.on('message', function(topic, message) {
     // 厨房的人体红外感应器
     if (checkTopicProperty('move-sensor-1', 'occupancy') && !disableSensor1) {
       const sendMesg = mesgJSON.occupancy ? '{ "state": "ON" }' :  '{ "state": "OFF" }';
-      const topic = mesgJSON.occupancy ? 'zigbee2mqtt/ikea-lightstrip-driver-1/set' : 'zigbee2mqtt/kitchen/set';
-      console.log(`Send Topic: ${topic}, Message: ${sendMesg}`);
-      client.publish(topic, sendMesg, { qos: 0, retain: false }, (error) => {
-        if (error) {
-          console.error(error)
-        }
+      const topics = mesgJSON.occupancy ? kitchen_topics_auto_on : kitchen_topics;
+      topics.forEach((topic) => {
+        console.log(`Send Topic: ${topic}, Message: ${sendMesg}`);
+        client.publish(topic, sendMesg, { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
       })
+
     }
 
     // 主卧窗帘
     if (checkTopicProperty('ikea-styrbar-d-1', 'action') || 
         checkTopicProperty('ikea-styrbar-d-2', 'action') ||
-        checkTopicProperty('ikea-styrbar-d-3', 'action')) {
+        checkTopicProperty('ikea-styrbar-d-3', 'action') ||
+        checkTopicProperty('d-2', 'action') ||
+        checkTopicProperty('d-3', 'action')) {
       console.log(topic, mesgJSON);
       if (mesgJSON.action === 'arrow_left_click') {
         // 关窗帘
@@ -114,8 +150,8 @@ client.on('message', function(topic, message) {
           }
         })
       }
-      if (mesgJSON.action === 'on' ||
-          mesgJSON.action === 'off') {
+      if (mesgJSON?.action?.toLowerCase() === 'on' ||
+          mesgJSON?.action?.toLowerCase() === 'off') {
         const curtainTopic = 'zigbee2mqtt/curtain-1/set';
         console.log('curtain-1 stop')
         client.publish(curtainTopic, '{ "state": "stop" }', { qos: 0, retain: false }, (error) => {
@@ -146,13 +182,23 @@ client.on('message', function(topic, message) {
     };
 
     // 厕所的主开关
-    if (checkTopicProperty('ikea-styrbar-g-2', 'action')) {
-      if (mesgJSON.action === 'on') {
+    const bathroom_topics_auto_on = [
+      'zigbee2mqtt/ceiling-3/set',
+      'zigbee2mqtt/ceiling-4/set',
+    ];
+    const bathroom_topics = [
+      ...bathroom_topics_auto_on,
+      'zigbee2mqtt/ikea-lightstrip-driver-4/set',
+    ];
+    if (checkTopicProperty('ikea-styrbar-g-1', 'action')) {
+      const state = fnLightControlMessage(mesgJSON, bathroom_topics, bathroom_topics);
+
+      if (state === 'on') {
         keepLight2 = true;
         disableSensor2 = true;
         console.log(`Disable Sensor 2 set to: `, disableSensor2);        
       }
-      if (mesgJSON.action === 'off') {
+      if (state === 'off') {
         keepLight2 = false;
         setTimeout(fnDisableSensor2Off, 3000);
       }
@@ -171,13 +217,16 @@ client.on('message', function(topic, message) {
     // 厕所的人体红外感应器
     if (checkTopicProperty('move-sensor-2', 'occupancy') && !disableSensor2) {
       const sendMesg = mesgJSON.occupancy ? '{ "state": "ON" }' :  '{ "state": "OFF" }';
-      const topic = 'zigbee2mqtt/bathroom/set';
-      console.log(`Send Topic: ${topic}, Message: ${sendMesg}`);
-      client.publish(topic, sendMesg, { qos: 0, retain: false }, (error) => {
-        if (error) {
-          console.error(error)
-        }
+      const topics = mesgJSON.occupancy ? bathroom_topics_auto_on : bathroom_topics;
+      topics.forEach((topic) => {
+        console.log(`Send Topic: ${topic}, Message: ${sendMesg}`);
+        client.publish(topic, sendMesg, { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
       })
+
     }
   }
 });
