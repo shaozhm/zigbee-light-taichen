@@ -48,6 +48,9 @@ let disableSensor2 = false;
 let keepLight2 = true;
 let door2contact = false;
 
+// 主卧窗帘状态
+let mainBedroomCurtainAction = 'stop';
+
 const fnLightControlMessage = (mesgJSON, topics_on, topics_off) => {
   let state = null;
   if (mesgJSON?.action?.toLowerCase() === 'on') {
@@ -70,6 +73,63 @@ const fnLightControlMessage = (mesgJSON, topics_on, topics_off) => {
   return state;
 }
 
+const fnSetTopic = (name) => (`zigbee2mqtt/${name}/set`);
+
+const kitchen_topics_auto_on = [
+  fnSetTopic('ikea-lightstrip-driver-1'),
+];
+const kitchen_topics = [
+  ...kitchen_topics_auto_on,
+  fnSetTopic('ikea-lightstrip-driver-2'),
+];
+
+const bathroom_topics_auto_on = [
+  fnSetTopic('ceiling-3'),
+  fnSetTopic('ceiling-4'),
+];
+const bathroom_topics = [
+  ...bathroom_topics_auto_on,
+  fnSetTopic('ikea-lightstrip-driver-4'),
+];
+
+const livingroom_topics = [
+  fnSetTopic('led-1'),
+  fnSetTopic('led-2'),
+  fnSetTopic('led-3'),
+];
+
+const store_light_topics = [
+  fnSetTopic('ceiling-2'),
+];
+
+const main_bedroom_topics = [
+  fnSetTopic('hue-bulb-d-1'),
+  fnSetTopic('hue-bulb-d-2'),
+  fnSetTopic('hue-bulb-d-3'),
+];
+
+const studyroom_topics = [
+  fnSetTopic('hue-bulb-a-1'),
+  fnSetTopic('hue-bulb-a-2'),
+  fnSetTopic('hue-bulb-a-3'),
+];
+
+const second_bedroom_topics = [
+  fnSetTopic('hue-bulb-e-1'),
+  fnSetTopic('hue-bulb-e-2'),
+  fnSetTopic('hue-bulb-e-3'),
+];
+
+const all_light_topics = [
+  ...kitchen_topics,
+  ...bathroom_topics,
+  ...main_bedroom_topics,
+  ...studyroom_topics,
+  ...second_bedroom_topics,
+  ...livingroom_topics,
+  ...store_light_topics,
+];
+
 client.on('message', function(topic, message) {
   console.log(`[${topic}] message: `, message.toString());
   console.log(`KeepLight-1/Disable Sensor 1: `, keepLight1, disableSensor1);
@@ -87,13 +147,6 @@ client.on('message', function(topic, message) {
       }
     };
 
-    const kitchen_topics_auto_on = [
-      'zigbee2mqtt/ikea-lightstrip-driver-1/set',
-    ];
-    const kitchen_topics = [
-      ...kitchen_topics_auto_on,
-      'zigbee2mqtt/ikea-lightstrip-driver-2/set',
-    ];
     // 厨房门口主开关
     if (checkTopicProperty('ikea-styrbar-f-1', 'action')) {
       const state = fnLightControlMessage(mesgJSON, kitchen_topics, kitchen_topics);
@@ -123,6 +176,7 @@ client.on('message', function(topic, message) {
 
     }
 
+    const mainBedroomCurtainTopic = 'zigbee2mqtt/curtain-1/set';
     // 主卧窗帘
     if (checkTopicProperty('ikea-styrbar-d-1', 'action') || 
         checkTopicProperty('ikea-styrbar-d-2', 'action') ||
@@ -132,34 +186,22 @@ client.on('message', function(topic, message) {
       console.log(topic, mesgJSON);
       if (mesgJSON.action === 'arrow_left_click') {
         // 关窗帘
-        console.log('curtain-1 is closing ... ...')
-        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
-        client.publish(curtainTopic, '{ "state": "close" }', { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
-          }
-        })
+        mainBedroomCurtainAction = mainBedroomCurtainAction === 'close' ? 'stop' : 'close';
       }
       if (mesgJSON.action === 'arrow_right_click') {
         //  开窗帘
-        console.log('curtain-1 is opening ... ...')
-        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
-        client.publish(curtainTopic, '{ "state": "open" }', { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
-          }
-        })
+        mainBedroomCurtainAction = mainBedroomCurtainAction === 'open' ? 'stop' : 'open';
       }
       if (mesgJSON?.action?.toLowerCase() === 'on' ||
           mesgJSON?.action?.toLowerCase() === 'off') {
-        const curtainTopic = 'zigbee2mqtt/curtain-1/set';
-        console.log('curtain-1 stop')
-        client.publish(curtainTopic, '{ "state": "stop" }', { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
-          }
-        })
+        mainBedroomCurtainAction = 'stop';
       }
+      console.log(`curtain-1: ${mainBedroomCurtainAction}`)
+      client.publish(mainBedroomCurtainTopic, `{ "state": "${mainBedroomCurtainAction}" }`, { qos: 0, retain: false }, (error) => {
+        if (error) {
+          console.error(error)
+        }
+      })
     }
 
     // 主卧的床前总控开关
@@ -167,6 +209,13 @@ client.on('message', function(topic, message) {
       const { action } = mesgJSON;
       const sendMesg = action === 'single' ? '{"state": "ON"}' : action === 'double' || action ==='triple' || action === 'quadruple' ? '{"state": "OFF"}' : null
       if (sendMesg) {
+        all_light_topics.forEach((topic) => {
+          client.publish(topic, sendMesg, { qos: 0, retain: false }, (error) => {
+            if (error) {
+              console.error(error)
+            }
+          })
+        })
       }
     }
 
@@ -182,14 +231,6 @@ client.on('message', function(topic, message) {
     };
 
     // 厕所的主开关
-    const bathroom_topics_auto_on = [
-      'zigbee2mqtt/ceiling-3/set',
-      'zigbee2mqtt/ceiling-4/set',
-    ];
-    const bathroom_topics = [
-      ...bathroom_topics_auto_on,
-      'zigbee2mqtt/ikea-lightstrip-driver-4/set',
-    ];
     if (checkTopicProperty('ikea-styrbar-g-1', 'action')) {
       const state = fnLightControlMessage(mesgJSON, bathroom_topics, bathroom_topics);
 
