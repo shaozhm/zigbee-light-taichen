@@ -1,19 +1,19 @@
 const { _: Lodash } = require('lodash');
 
 class Basic {
-  constructor(topic, payload) {
+  constructor(topic, payload, device) {
     this.topic = topic;
     this.payload = payload;
+    this.device = device;
   }
 
   checkTopicProperty(topicEndString, property) {
     return this.topic.endsWith(topicEndString) && Lodash.isObject(this.payload) && Lodash.has(this.payload, property) && !Lodash.isNil(this.payload[property]);
   }
   checkTopicsProperty(topics, property) {
-    return topics.some((topic) => this.checkTopicProperty(topic, property));
-  }
-  checkTopicsAction(topics) {
-    return this.checkTopicsProperty(topics, 'action');
+    const value = [].concat(topics).some((topic) => this.checkTopicProperty(topic, property));
+    console.log(`checkTopicsProperty: ${[].concat(topics).join(',')}: ${value}`);
+    return value;
   }
 }
 

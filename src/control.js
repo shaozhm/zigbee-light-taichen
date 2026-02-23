@@ -1,0 +1,28 @@
+const {
+  Button,
+ } = require('./button');
+const {
+  MotionSensor,
+ } = require('./motion-sensor');
+
+class Control {
+  static init(topic, payload, device) {
+    const type = device?.modelDetails?.type;
+    switch(type) {
+      case 'button':
+        return new Button(topic, payload, device);
+      case 'motion-sensor':
+        return new MotionSensor(topic, payload, device);
+      case 'door-sensor':
+        break;
+      default:
+        return new Button(topic, payload, device);
+    }
+    return new Basic(topic, payload, device);
+  }
+}
+const exportFunctions = {
+  Control,
+};
+
+module.exports = exportFunctions;

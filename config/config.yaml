@@ -16,11 +16,27 @@ products:
   - model: RTCGQ01LM
     vendor: Xiaomi
     description: Mi motion sensor
-    type: motion
+    type: motion-sensor
   - model: MCCGQ01LM
     vendor: Xiaomi
     description: Mi door and window sensor
-    type: door
+    type: door-sensor
+  - model: GZCGQ01LM
+    vendor: Xiaomi
+    description: Mi light sensor
+    type: light-sensor
+  - model: LWB016
+    vendor: Philips
+    description: Hue White E26 806 lumen
+    type: light
+  - model: LTD006
+    vendor: Signify Netherlands B.V.
+    description: Hue Light
+    type: light
+  - model: ICPSHC24-10EU-IL-1
+    vendor: IKEA
+    description: TRADFRI LED driver, 10 w
+    type: light
 devices:
   - name: music-button
     model: WXKG01LM
@@ -30,17 +46,120 @@ devices:
     model: WXKG01LM
   - name: ikea-styrbar-f-1
     model: E2001
+    config:
+      depends:
+        - move-sensor-1
   - name: ikea-styrbar-d-1
     model: E2001
   - name: ikea-styrbar-g-1
     model: E2001
+    config:
+      depends:
+        - move-sensor-2
   - name: d-2
     model: E1524
   - name: d-3
     model: E1524
   - name: move-sensor-1
     model: RTCGQ01LM
+    config: 
+      delayOffTime: 3000
+      targets:
+        on: kitchen_auto_on
+        off: kitchen
   - name: move-sensor-2
     model: RTCGQ01LM
+    config: 
+      delayOffTime: 3000
+      targets:
+        on: bathroom_auto_on
+        off: bathroom
   - name: door-2
     model: MCCGQ01LM
+  - name: light-sensor-1
+    model: GZCGQ01LM
+targets:
+  - name: hue-bulb-a-1
+    model: LWB016
+  - name: hue-bulb-a-2
+    model: LWB016
+  - name: hue-bulb-a-3
+    model: LWB016
+  - name: hue-bulb-d-1
+    model: LWB016
+  - name: hue-bulb-d-2
+    model: LWB016
+  - name: hue-bulb-d-3
+    model: LWB016
+  - name: hue-bulb-e-1
+    model: LWB016
+  - name: hue-bulb-e-2
+    model: LWB016
+  - name: hue-bulb-e-3
+    model: LWB016
+  - name: ceiling-2
+    model: LTD006
+  - name: ceiling-3
+    model: LTD006
+  - name: ceiling-4
+    model: LTD006
+  - name: led-1
+    model: ICPSHC24-10EU-IL-1
+  - name: led-2
+    model: ICPSHC24-10EU-IL-1
+  - name: led-3
+    model: ICPSHC24-10EU-IL-1
+  - name: ikea-lightstrip-driver-1
+    model: ICPSHC24-10EU-IL-1
+  - name: ikea-lightstrip-driver-2
+    model: ICPSHC24-10EU-IL-1
+  - name: ikea-lightstrip-driver-4
+    model: ICPSHC24-10EU-IL-1
+groups:
+  - name: kitchen_auto_on
+    devices:
+      - ikea-lightstrip-driver-1
+  - name: kitchen
+    devices:
+      - ikea-lightstrip-driver-1
+      - ikea-lightstrip-driver-2
+  - name: bathroom_auto_on
+    devices: 
+      - ceiling-3
+      - ceiling-4
+  - name: bathroom
+    devices:
+      - ceiling-3
+      - ceiling-4
+      - ikea-lightstrip-driver-4
+  - name: livingroom
+    devices: 
+      - led-1
+      - led-2
+      - led-3
+  - name: main_bedroom
+    devices:
+      - hue-bulb-d-1
+      - hue-bulb-d-2
+      - hue-bulb-d-3
+  - name: studyroom
+    devices:
+      - hue-bulb-a-1
+      - hue-bulb-a-2
+      - hue-bulb-a-3
+  - name: second_bedroom
+    devices: 
+      - hue-bulb-e-1
+      - hue-bulb-e-2
+      - hue-bulb-e-3
+regions:
+  - name: kitchen
+    devices:
+      - ikea-styrbar-f-1
+      - move-sensor-1
+    groups:
+      - kitchen
+      - kitchen_auto_on
+    targets:
+      - ikea-lightstrip-driver-1
+      - ikea-lightstrip-driver-2
