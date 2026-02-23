@@ -37,6 +37,10 @@ products:
     vendor: IKEA
     description: TRADFRI LED driver, 10 w
     type: light
+  - model: ZNCLDJ12LM
+    vendor: Aqara
+    description: Curtain controller B1
+    type: curtain
 devices:
   - name: music-button
     model: WXKG01LM
@@ -51,6 +55,9 @@ devices:
         - move-sensor-1
   - name: ikea-styrbar-d-1
     model: E2001
+    config:
+      binds:
+        - curtain-1
   - name: ikea-styrbar-g-1
     model: E2001
     config:
@@ -58,8 +65,14 @@ devices:
         - move-sensor-2
   - name: d-2
     model: E1524
+    config:
+      binds:
+        - curtain-1
   - name: d-3
     model: E1524
+    config:
+      binds:
+        - curtain-1
   - name: move-sensor-1
     model: RTCGQ01LM
     config: 
@@ -115,6 +128,8 @@ targets:
     model: ICPSHC24-10EU-IL-1
   - name: ikea-lightstrip-driver-4
     model: ICPSHC24-10EU-IL-1
+  - name: curtain-1
+    model: ZNCLDJ12LM
 groups:
   - name: kitchen_auto_on
     devices:
