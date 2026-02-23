@@ -1,18 +1,46 @@
-address: sonos.local
+address: zigbee.local
 port: 1883
-topics:
-  - zigbee2mqtt/music-button
-  - zigbee2mqtt/move-sensor-1
-  - zigbee2mqtt/ikea-styrbar-f-1
-  - zigbee2mqtt/ikea-styrbar-d-1
-  - zigbee2mqtt/ikea-styrbar-d-2
-  - zigbee2mqtt/ikea-styrbar-d-3
-  - zigbee2mqtt/d-2
-  - zigbee2mqtt/d-3
-  - zigbee2mqtt/button-1
-  - zigbee2mqtt/button-2
-  - zigbee2mqtt/move-sensor-2
-  - zigbee2mqtt/door-2
-  - zigbee2mqtt/ceiling-3
-  - zigbee2mqtt/ceiling-4
-  - zigbee2mqtt/ikea-styrbar-g-1
+products:
+  - model: WXKG01LM
+    vendor: Xiaomi
+    description: Mi wireless switch
+    type: button
+  - model: E2001
+    vendor: IKEA
+    description: STYRBAR remote control
+    type: button
+  - model: E1524
+    vendor: IKEA
+    description: TRADFRI remote control
+    type: button
+  - model: RTCGQ01LM
+    vendor: Xiaomi
+    description: Mi motion sensor
+    type: motion
+  - model: MCCGQ01LM
+    vendor: Xiaomi
+    description: Mi door and window sensor
+    type: door
+devices:
+  - name: music-button
+    model: WXKG01LM
+  - name: button-1
+    model: WXKG01LM
+  - name: button-2
+    model: WXKG01LM
+  - name: ikea-styrbar-f-1
+    model: E2001
+  - name: ikea-styrbar-d-1
+    model: E2001
+  - name: ikea-styrbar-g-1
+    model: E2001
+  - name: d-2
+    model: E1524
+  - name: d-3
+    model: E1524
+  - name: move-sensor-1
+    model: RTCGQ01LM
+  - name: move-sensor-2
+    model: RTCGQ01LM
+  - name: door-2
+    model: MCCGQ01LM

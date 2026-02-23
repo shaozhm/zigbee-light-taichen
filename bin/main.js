@@ -2,10 +2,13 @@
 const mqtt = require('mqtt');
 const Path = require('path');
 const Fs = require('fs');
-const { _: Lodash } = require('lodash');
 const {
   read,
 } = require('../src/yaml');
+
+const {
+  Basic
+ } = require('../src/basic');
 
 const DEFAULT_CONFIGFILE = 'config.yaml';
 const configPath = Path.join('.', 'config', DEFAULT_CONFIGFILE);
@@ -20,7 +23,7 @@ const config = read(configPath);
 const {
   address,
   port,
-  topics,
+  devices,
 } = config;
 
 console.log("Creating new MQTT client for url: ", address);
@@ -34,7 +37,11 @@ client.on('offline', function() {
   client.end();
 });
 
-topics.forEach((topic) => {
+devices.forEach((device) => {
+  const {
+    name,
+  } = device;
+  const topic = `zigbee2mqtt/${name}`;
   client.subscribe(`${topic}`);
   console.log(`subscribed ${topic}`);
 });
@@ -130,6 +137,17 @@ const all_light_topics = [
   ...store_light_topics,
 ];
 
+const fnDisableSensorOff = (keepLight, disableSensor, sensorName, delayTime = 3000) => {
+  const timerFunction = () => {
+    if (!keepLight) {
+      disableSensor = false;
+      console.log(`Disable ${sensorName} set to: `, disableSensor);
+    }
+  }
+  keepLight = false;
+  setTimeout(timerFunction, delayTime);
+};
+
 client.on('message', function(topic, message) {
   console.log(`[${topic}] message: `, message.toString());
   console.log(`KeepLight-1/Disable Sensor 1: `, keepLight1, disableSensor1);
@@ -137,18 +155,10 @@ client.on('message', function(topic, message) {
   if (topic.startsWith('zigbee2mqtt')) {
     console.log('button message', message.toString());
     const mesgJSON = JSON.parse(message.toString());
-    const checkTopicProperty = (topicEndString, property) => topic.endsWith(topicEndString) && Lodash.isObject(mesgJSON) && Lodash.has(mesgJSON, property) && !Lodash.isNil(mesgJSON[property]);
-
-    // 延迟开启厨房人体红外感应器
-    const fnDisableSensor1Off = () => {
-      if (!keepLight1) {
-        disableSensor1 = false;
-        console.log(`Disable Sensor 1 set to: `, disableSensor1);
-      }
-    };
+    const basic = new Basic(topic, mesgJSON);
 
     // 厨房门口主开关
-    if (checkTopicProperty('ikea-styrbar-f-1', 'action')) {
+    if (basic.checkTopicProperty('ikea-styrbar-f-1', 'action')) {
       const state = fnLightControlMessage(mesgJSON, kitchen_topics, kitchen_topics);
       if (state === 'on') {
         keepLight1 = true;
@@ -156,13 +166,13 @@ client.on('message', function(topic, message) {
         console.log(`Disable Sensor 1 set to: `, disableSensor1);
       }
       if (state === 'off') {
-        keepLight1 = false;
-        setTimeout(fnDisableSensor1Off, 3000);
+        // 延迟开启厨房人体红外感应器
+        fnDisableSensorOff(keepLight1, disableSensor1, 'Sensor 1', 3000);
       }
     }
 
     // 厨房的人体红外感应器
-    if (checkTopicProperty('move-sensor-1', 'occupancy') && !disableSensor1) {
+    if (basic.checkTopicProperty('move-sensor-1', 'occupancy') && !disableSensor1) {
       const sendMesg = mesgJSON.occupancy ? '{ "state": "ON" }' :  '{ "state": "OFF" }';
       const topics = mesgJSON.occupancy ? kitchen_topics_auto_on : kitchen_topics;
       topics.forEach((topic) => {
@@ -178,11 +188,11 @@ client.on('message', function(topic, message) {
 
     const mainBedroomCurtainTopic = 'zigbee2mqtt/curtain-1/set';
     // 主卧窗帘
-    if (checkTopicProperty('ikea-styrbar-d-1', 'action') || 
-        checkTopicProperty('ikea-styrbar-d-2', 'action') ||
-        checkTopicProperty('ikea-styrbar-d-3', 'action') ||
-        checkTopicProperty('d-2', 'action') ||
-        checkTopicProperty('d-3', 'action')) {
+    if (basic.checkTopicsAction([
+      'ikea-styrbar-d-1',
+      'd-2',
+      'd-3',
+    ])) {
       console.log(topic, mesgJSON);
       if (mesgJSON.action === 'arrow_left_click') {
         // 关窗帘
@@ -222,16 +232,8 @@ client.on('message', function(topic, message) {
     // keepLight变量: 表示目前希望开/关灯，但关灯会延迟几秒再执行，当延迟时间到时，执行前需检测 keepLight 变量是否还是 false. 
     // 到那时如果还是 false 则需要关灯，否则不需要执行。
 
-    // 延迟开启厕所的人体红外感应器
-    const fnDisableSensor2Off = () => {
-      if (!keepLight2) {
-        disableSensor2 = false;
-        console.log(`Disable Sensor 2 set to: `, disableSensor2);
-      }
-    };
-
     // 厕所的主开关
-    if (checkTopicProperty('ikea-styrbar-g-1', 'action')) {
+    if (basic.checkTopicProperty('ikea-styrbar-g-1', 'action')) {
       const state = fnLightControlMessage(mesgJSON, bathroom_topics, bathroom_topics);
 
       if (state === 'on') {
@@ -240,13 +242,13 @@ client.on('message', function(topic, message) {
         console.log(`Disable Sensor 2 set to: `, disableSensor2);        
       }
       if (state === 'off') {
-        keepLight2 = false;
-        setTimeout(fnDisableSensor2Off, 3000);
+        // 延迟开启厕所的人体红外感应器
+        fnDisableSensorOff(keepLight2, disableSensor2, 'Sensor 2', 3000);
       }
     }
 
     // 厕所的门感应器
-    if (checkTopicProperty('door-2', 'contact')) {
+    if (basic.checkTopicProperty('door-2', 'contact')) {
       door2contact = mesgJSON.contact;
       console.log('door-2 contact', door2contact);
       // 如果门关着，人体红外感应器要停止检测。
@@ -256,7 +258,7 @@ client.on('message', function(topic, message) {
     }
 
     // 厕所的人体红外感应器
-    if (checkTopicProperty('move-sensor-2', 'occupancy') && !disableSensor2) {
+    if (basic.checkTopicProperty('move-sensor-2', 'occupancy') && !disableSensor2) {
       const sendMesg = mesgJSON.occupancy ? '{ "state": "ON" }' :  '{ "state": "OFF" }';
       const topics = mesgJSON.occupancy ? bathroom_topics_auto_on : bathroom_topics;
       topics.forEach((topic) => {
