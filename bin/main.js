@@ -12,16 +12,8 @@ const {
 } = require('../src/control');
 
 const {
- MotionTarget
-} = require('../src/motion-sensor');
-
-const {
-  ButtonTarget
-} = require('../src/button');
-
-const {
-  CurtainTarget
-} = require('../src/curtain');
+  Config
+} = require('../src/config');
 
 const DEFAULT_CONFIGFILE = 'config.yaml';
 const configPath = Path.join('.', 'config', DEFAULT_CONFIGFILE);
@@ -31,16 +23,12 @@ if (!Fs.existsSync(configPath)) {
   console.error(`The ${DEFAULT_CONFIGFILE} file doesn't exist in ./config`);
 }
 
-const config = read(configPath);
+const configJson = read(configPath);
 
 const {
   address,
   port,
-  devices: configDevices,
-  targets: configTargets,
-  products,
-  groups,
-} = config;
+} = configJson;
 
 console.log("Creating new MQTT client for url: ", address);
 const client = mqtt.connect(`mqtt://${address}:${port}`);
@@ -53,112 +41,8 @@ client.on('offline', function() {
   client.end();
 });
 
-const devices = [];
-const curtains = [];
-const deviceInit = (configDevice) => {
-  const exist = Lodash.find(devices, {
-    name: configDevice.name,
-  })
-  if (exist) {
-    return exist;
-  }
-
-  const {
-    name,
-    model,
-    config,
-  } = configDevice;
-  const additions = {};
-  const modelDetails = Lodash.find(products, { model });
-  additions.modelDetails = modelDetails;
-
-  const topic = `zigbee2mqtt/${name}`;
-  client.subscribe(`${topic}`);
-  console.log(`subscribed ${topic}`);
-
-  // Motion Sensor
-  if (model === 'RTCGQ01LM' && config) {
-    const {
-      targets,
-    } = config;
-    const {
-      on,
-      off,
-    } = targets;
-    console.log(`on: ${on}`);
-    const onGroup = Lodash.find(groups, {
-      name: on
-    });
-    console.log(`onGroup: ${onGroup}`);
-    const offGroup = Lodash.find(groups, {
-      name: off
-    });
-
-    // new properties
-    additions.onGroup = onGroup;
-    additions.offGroup = offGroup;
-    additions.o = new MotionTarget(Object.assign(configDevice, {
-      onGroup,
-      offGroup,
-    }), client);
-  }
-
-  if (modelDetails.type === 'button' && config) {
-    const {
-      depends: configDepends,
-      binds: configBinds,
-    } = config;
-
-    // Motion Sensors
-    const dependDevices = [];
-    if (configDepends) {
-      configDepends.forEach((depend) => {
-        const configDevice = Lodash.find(configDevices, {
-          name: depend
-        });
-        if (configDevice) {
-          const device = deviceInit(configDevice);
-          dependDevices.push(device);
-        }
-      });
-    }
-
-    const bindTargets = [];
-    if (configBinds) {
-      configBinds.forEach((bind) => {
-        const bindTarget = Lodash.find(configTargets, {
-          name: bind
-        });
-        // Curtains
-        if (bindTarget?.model === 'ZNCLDJ12LM') {
-          let curtain = Lodash.find(curtains, {
-            name: bindTarget.name,
-          })
-          if (!curtain) {
-            curtain = new CurtainTarget(bindTarget, client);
-          }
-          bindTargets.push(curtain);
-        }
-      });
-    }
-
-    // new properies
-    additions.dependDevices = dependDevices;
-    additions.bindTargets = bindTargets;
-    additions.o = new ButtonTarget(Object.assign(configDevice, {
-      dependDevices,
-      bindTargets,
-    }), client);
-  }
-  
-  const device = Object.assign(configDevice, additions);
-  devices.push(device);
-  return device;
-}
-
-configDevices.forEach((device) => {
-  deviceInit(device);
-});
+const config = new Config(configJson, client);
+const devices = config.devices;
 
 // 厕所的全局变量定义
 let door2contact = false;

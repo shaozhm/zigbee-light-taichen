@@ -21,17 +21,27 @@ class Button extends Basic {
 
 class ButtonTarget {
   constructor(device, client) {
+    this.device = device
     this.client = client
     const {
-      dependDevices // MotionTarget(motion sensors)
+      dependDevices, // MotionTarget(motion sensors)
+      bindTargets, // curtain
     } = device;
     this.dependDevices = dependDevices; // MotionTarget(motion sensors)
-    const {
-      bindTargets: curtains // curtain
-    } = device;
-    this.curtains = curtains; // curtain
+    this.curtains = bindTargets; // curtain
   }
   action(value) {
+    const {
+      config,
+    } = this.device;
+    const configAction = config[value.toLowerCase()];
+    if (configAction) {
+      const {
+        group,
+        action,
+      } = configAction;
+
+    }
     if (value.toLowerCase() === 'on') {
       if (this.dependDevices) {
         this.dependDevices.forEach((device) => {
@@ -76,6 +86,7 @@ class ButtonTarget {
           curtain.action('open');
         });
     }
+
   }
 }
 

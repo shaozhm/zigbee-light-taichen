@@ -1,0 +1,142 @@
+const { _: Lodash } = require('lodash');
+const {
+  MotionTarget
+} = require('./motion-sensor');
+const {
+  ButtonTarget
+} = require('./button');
+const {
+  CurtainTarget
+} = require('./curtain');
+
+class Config {
+  devices = []
+  curtains = []
+  constructor(config, client) {
+    this.client = client;
+    const {
+      devices: configDevices,
+      targets: configTargets,
+      products,
+      groups,
+    } = config;
+    this.configDevices = configDevices;
+    this.configTargets = configTargets;
+    this.products = products;
+    this.groups = groups;
+    configDevices.forEach((device) => {
+      this.deviceInit(device);
+    });
+  }
+  
+  get devices() {
+    return this.devices;
+  }
+
+  deviceInit(configDevice) {
+    const exist = Lodash.find(this.devices, {
+      name: configDevice.name,
+    })
+    if (exist) {
+      return exist;
+    }
+
+    const {
+      name,
+      model,
+      config,
+    } = configDevice;
+
+    const additions = {};
+    const modelDetails = Lodash.find(this.products, { model });
+    additions.modelDetails = modelDetails;
+
+    const topic = `zigbee2mqtt/${name}`;
+    this.client.subscribe(`${topic}`);
+    console.log(`subscribed ${topic}`);
+
+    // Motion Sensor
+    if (model === 'RTCGQ01LM' && config) {
+      const {
+        targets,
+      } = config;
+      const {
+        on,
+        off,
+      } = targets;
+      const onGroup = Lodash.find(this.groups, {
+        name: on
+      });
+      const offGroup = Lodash.find(this.groups, {
+        name: off
+      });
+
+      // new properties
+      additions.onGroup = onGroup;
+      additions.offGroup = offGroup;
+      additions.o = new MotionTarget(Object.assign(configDevice, {
+        onGroup,
+        offGroup,
+      }), this.client);
+    }
+
+    if (modelDetails.type === 'button' && config) {
+      const {
+        depends: configDepends,
+        binds: configBinds,
+      } = config;
+
+      // Motion Sensors
+      const dependDevices = [];
+      if (configDepends) {
+        configDepends.forEach((depend) => {
+          const configDevice = Lodash.find(this.configDevices, {
+            name: depend
+          });
+          if (configDevice) {
+            const device = this.deviceInit(configDevice);
+            dependDevices.push(device);
+          }
+        });
+      }
+
+      // Curtains
+      const bindTargets = [];
+      if (configBinds) {
+        configBinds.forEach((bind) => {
+          const bindTarget = Lodash.find(this.configTargets, {
+            name: bind
+          });
+          // Curtains
+          if (bindTarget?.model === 'ZNCLDJ12LM') {
+            let curtain = Lodash.find(this.curtains, {
+              name: bindTarget.name,
+            })
+            if (!curtain) {
+              curtain = new CurtainTarget(bindTarget, this.client);
+              this.curtains.push(curtain);
+            }
+            bindTargets.push(curtain);
+          }
+        });
+      }
+
+      // new properies
+      additions.dependDevices = dependDevices;
+      additions.bindTargets = bindTargets;
+      additions.o = new ButtonTarget(Object.assign(configDevice, {
+        dependDevices,
+        bindTargets,
+      }), this.client);
+    }
+  
+    const device = Object.assign(configDevice, additions);
+    this.devices.push(device);
+    return device;
+  }
+}
+const exportFunctions = {
+  Config,
+};
+
+module.exports = exportFunctions;

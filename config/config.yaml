@@ -46,8 +46,28 @@ devices:
     model: WXKG01LM
   - name: button-1
     model: WXKG01LM
+    config:
+      double: 
+        group: all_lights
+        action: off
+      triple:
+        group: all_lights
+        action: off
+      quadruple:
+        group: all_lights
+        action: off      
   - name: button-2
     model: WXKG01LM
+    config:
+      double: 
+        group: all_lights
+        action: off
+      triple:
+        group: all_lights
+        action: off
+      quadruple:
+        group: all_lights
+        action: off 
   - name: ikea-styrbar-f-1
     model: E2001
     config:
@@ -167,6 +187,14 @@ groups:
       - hue-bulb-e-1
       - hue-bulb-e-2
       - hue-bulb-e-3
+  - name: all_lights
+    groups:
+      - kitchen
+      - bathroom
+      - livingroom
+      - main_bedroom
+      - studyroom
+      - second_bedroom
 regions:
   - name: kitchen
     devices:
