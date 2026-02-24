@@ -6,7 +6,6 @@ const {
 class Button extends Basic {
   constructor(topic, payload, device) {
     super(topic, payload, device);
-    console.log(`Button Init [${topic}]...`, device);
     const target = device.o;
     if (target) {
       target.action(payload.action);
@@ -37,7 +36,7 @@ class ButtonTarget {
     const {
       config,
     } = this.device;
-    if (value && value.toLowerCase()) {
+    if (value && value.toLowerCase() && config[value.toLowerCase()]) {
       const configAction = config[value.toLowerCase()];
       const {
         group: groupName,

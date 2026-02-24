@@ -14,9 +14,8 @@ class Control {
       case 'motion-sensor':
         return new MotionSensor(topic, payload, device);
       case 'door-sensor':
-        break;
       default:
-        return new Button(topic, payload, device);
+        return null;
     }
     return new Basic(topic, payload, device);
   }

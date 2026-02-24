@@ -82,8 +82,36 @@ devices:
   - name: ikea-styrbar-d-1
     model: E2001
     config:
+      on:
+        group: main_bedroom
+        action: on
+      off:
+        group: main_bedroom
+        action: off
       binds:
         - curtain-1
+  - name: ikea-styrbar-e-1
+    model: E2001
+    config:
+      on:
+        group: second_bedroom
+        action: on
+      off:
+        group: second_bedroom
+        action: off
+      binds:
+        - curtain-2
+  - name: ikea-styrbar-e-2
+    model: E2001
+    config:
+      on:
+        group: second_bedroom
+        action: on
+      off:
+        group: second_bedroom
+        action: off
+      binds:
+        - curtain-2
   - name: ikea-styrbar-g-1
     model: E2001
     config:
@@ -162,6 +190,8 @@ targets:
     model: ICPSHC24-10EU-IL-1
   - name: curtain-1
     model: ZNCLDJ12LM
+  - name: curtain-2
+    model: ZNCLDJ12LM
 groups:
   - name: kitchen_auto_on
     devices:
@@ -207,14 +237,3 @@ groups:
       - main_bedroom
       - studyroom
       - second_bedroom
-regions:
-  - name: kitchen
-    devices:
-      - ikea-styrbar-f-1
-      - move-sensor-1
-    groups:
-      - kitchen
-      - kitchen_auto_on
-    targets:
-      - ikea-lightstrip-driver-1
-      - ikea-lightstrip-driver-2
