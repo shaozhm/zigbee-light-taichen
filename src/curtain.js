@@ -7,6 +7,9 @@ class CurtainTarget {
   get name() {
     return this.target?.name;
   }
+  get class() {
+    return 'curtain'
+  }
   get lastAction() {
     return this.lastAction;
   }

@@ -31,9 +31,13 @@ class ButtonTarget {
       bindTargets, // curtain
     } = device;
     this.dependDevices = dependDevices; // MotionTarget(motion sensors)
-    this.curtains = bindTargets; // curtain
+    this.bindTargets = bindTargets; // curtain
+  }
+  get deviceName() {
+    return this.device?.name;
   }
   action(value) {
+    console.log(`Bttton ${this.deviceName}: ${value}`);
     const {
       config,
     } = this.device;
@@ -70,7 +74,7 @@ class ButtonTarget {
       }
     }
     
-    if (value.toLowerCase() === 'on') {
+    if (value && value.toLowerCase() === 'on') {
       if (this.dependDevices) {
         this.dependDevices.forEach((device) => {
           const target = device.o;
@@ -79,13 +83,15 @@ class ButtonTarget {
           }
         });
       }
-      if (this.curtains) {
-        this.curtains.forEach((curtain) => {
-          curtain.action('stop');
+      if (this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          if (target.class === 'curtain') {
+            target.action('stop');
+          }
         });
       }
     }
-    if (value.toLowerCase() === 'off') {
+    if (value && value.toLowerCase() === 'off') {
       if (this.dependDevices) {
         this.dependDevices.forEach((device) => {
           const target = device.o;
@@ -94,25 +100,51 @@ class ButtonTarget {
           }
         });
       }
-      if (this.curtains) {
-        this.curtains.forEach((curtain) => {
-          curtain.action('stop');
+      if (this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          if (target.class === 'curtain') {
+            target.action('stop');
+          }
         });
       }
     }
-    if (value.toLowerCase() === 'arrow_left_click' && this.curtains) {
-        // 关窗帘
-        this.curtains.forEach((curtain) => {
-          curtain.action('close');
+    if (value && value.toLowerCase() === 'arrow_left_click' && this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          // 关窗帘
+          if (target.class === 'curtain') {
+            target.action('close');
+          }
         });
     }
-    if (value.toLowerCase() === 'arrow_right_click' && this.curtains) {
-        //  开窗帘
-        this.curtains.forEach((curtain) => {
-          curtain.action('open');
+    if (value && value.toLowerCase() === 'arrow_right_click' && this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          // 开窗帘
+          if (target.class === 'curtain') {
+            target.action('open');
+          }
         });
     }
-
+    if (value && value.toLowerCase() === 'single' && this.bindTargets) {
+      this.bindTargets.forEach((target) => {
+        if (target.class === 'blynk') {
+          target.action('on');
+        }
+      });
+    }
+    if (value && value.toLowerCase() === 'double' && this.bindTargets) {
+      this.bindTargets.forEach((target) => {
+        if (target.class === 'blynk') {
+          target.action('off');
+        }
+      });
+    }
+    if (value && value.toLowerCase() === 'triple' && this.bindTargets) {
+      this.bindTargets.forEach((target) => {
+        if (target.class === 'blynk') {
+          target.action('off');
+        }
+      });
+    }
   }
   getTargetsViaGroup(groupName) {
     const allTargets = [];

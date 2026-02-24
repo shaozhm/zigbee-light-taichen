@@ -41,9 +41,16 @@ products:
     vendor: Aqara
     description: Curtain controller B1
     type: curtain
+  - model: blynk
+    vendor: blynk
+    description: software controller
+    type: blynk
 devices:
   - name: music-button
     model: WXKG01LM
+    config:
+      binds:
+        - blynk-1
   - name: button-1
     model: WXKG01LM
     config:
@@ -200,6 +207,8 @@ targets:
     model: ZNCLDJ12LM
   - name: curtain-2
     model: ZNCLDJ12LM
+  - name: blynk-1
+    model: blynk
 groups:
   - name: kitchen_auto_on
     devices:

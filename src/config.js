@@ -11,11 +11,15 @@ const {
 const {
   LightTarget
 } = require('./light-sensor');
+const {
+  BlynkTarget
+} = require('./blynk-target');
 
 class Config {
   devices = []
   curtains = []
   lightSensors = []
+  blynks = []
   instance = null;
   constructor(config, client) {
     this.config = config;
@@ -122,7 +126,6 @@ class Config {
         });
       }
 
-      // Curtains
       const bindTargets = [];
       if (configBinds) {
         configBinds.forEach((bind) => {
@@ -139,6 +142,17 @@ class Config {
               this.curtains.push(curtain);
             }
             bindTargets.push(curtain);
+          }
+          // Blynk
+          if (bindTarget?.model === 'blynk') {
+            let blynk = Lodash.find(this.blynks, {
+              name: bindTarget.name,
+            })
+            if (!blynk) {
+              blynk = new BlynkTarget(bindTarget, this.client);
+              this.blynks.push(blynk);
+            }
+            bindTargets.push(blynk);
           }
         });
       }
