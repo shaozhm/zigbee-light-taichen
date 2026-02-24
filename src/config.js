@@ -149,7 +149,7 @@ class Config {
       additions.o = new ButtonTarget(Object.assign(configDevice, {
         dependDevices,
         bindTargets,
-      }), this.client, this.configGroups);
+      }), this.client, this.configGroups, this.configTargets);
     }
     
     // Light Sensor
@@ -166,6 +166,29 @@ class Config {
     const device = Object.assign(configDevice, additions);
     this.devices.push(device);
     return device;
+  }
+
+  getTargetsViaGroup(groupName) {
+    const allTargets = [];
+    const group = Lodash.find(this.configGroups, {
+      name: groupName,
+    });
+    if (group) {
+       const {
+        devices,
+        groups,
+       } = group;
+       if (devices) {
+        allTargets.push(...devices);
+       }
+       if (groups) {
+        groups.forEach((group) => {
+          const devices = fnFindGroup(group);
+          allTargets.push(...devices);
+        });
+       }
+    }
+    return allTargets;
   }
 }
 const exportFunctions = {

@@ -20,7 +20,7 @@ products:
   - model: MCCGQ01LM
     vendor: Xiaomi
     description: Mi door and window sensor
-    type: door-sensor
+    type: contact-sensor
   - model: GZCGQ01LM
     vendor: Xiaomi
     description: Mi light sensor
@@ -149,6 +149,14 @@ devices:
         off: bathroom
   - name: door-2
     model: MCCGQ01LM
+    config:
+      default: on
+      on:
+        target: led-1
+        action: on
+      off:
+        target: led-1
+        action: off
   - name: light-sensor-1
     model: GZCGQ01LM
 targets:

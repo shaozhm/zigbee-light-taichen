@@ -7,7 +7,9 @@ const {
  const {
   LightSensor,
  } = require('./light-sensor');
-
+ const {
+  ContactSensor,
+ } = require('./contact-sensor');
 class Control {
   static init(topic, payload, device) {
     const type = device?.modelDetails?.type;
@@ -18,11 +20,11 @@ class Control {
         return new MotionSensor(topic, payload, device);
       case 'light-sensor':
         return new LightSensor(topic, payload, device);
-      case 'door-sensor':
+      case 'contact-sensor':
+        return new ContactSensor(topic, payload, device);
       default:
         return null;
     }
-    return new Basic(topic, payload, device);
   }
 }
 const exportFunctions = {

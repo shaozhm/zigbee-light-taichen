@@ -20,10 +20,11 @@ class Button extends Basic {
 }
 
 class ButtonTarget {
-  constructor(device, client, configGroups) {
+  constructor(device, client, configGroups, configTargets) {
     this.device = device
     this.client = client
     this.configGroups = configGroups;
+    this.configTargets = configTargets;
 
     const {
       dependDevices, // MotionTarget(motion sensors)
@@ -40,40 +41,33 @@ class ButtonTarget {
       const configAction = config[value.toLowerCase()];
       const {
         group: groupName,
+        target: targetName,
         action: actionText,
       } = configAction;
-
-      const fnFindGroup = (name) => {
-        const allDevices = [];
-        const group = Lodash.find(this.configGroups, {
-          name,
+      if (groupName && actionText) {
+        const deviceTargets = this.getTargetsViaGroup(groupName);
+        deviceTargets.forEach((target) => {
+          console.log(`${target}: ${actionText}`)
+          this.client.publish(`zigbee2mqtt/${target}/set`, `{ "state": "${actionText.toUpperCase()}" }`, { qos: 0, retain: false }, (error) => {
+            if (error) {
+              console.error(error)
+            }
+          })
         });
-        if (group) {
-           const {
-            devices,
-            groups,
-           } = group;
-           if (devices) {
-            allDevices.push(...devices);
-           }
-           if (groups) {
-            groups.forEach((group) => {
-              const devices = fnFindGroup(group);
-              allDevices.push(...devices);
-            });
-           }
-        }
-        return allDevices;
-      }
-      const deviceTargets = fnFindGroup(groupName);
-      deviceTargets.forEach((target) => {
-        console.log(`${target}: ${actionText}`)
-        this.client.publish(`zigbee2mqtt/${target}/set`, `{ "state": "${actionText.toUpperCase()}" }`, { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
+        if (targetName && actionText) {
+          const target = Lodash.find(this.configTargets, {
+            name: targetName,
+          });
+          if (target) {
+            console.log(`${target.name}: ${actionText}`)
+            this.client.publish(`zigbee2mqtt/${target.name}/set`, `{ "state": "${actionText.toUpperCase()}" }`, { qos: 0, retain: false }, (error) => {
+              if (error) {
+                console.error(error)
+              }
+            })
           }
-        })
-      });
+        }
+      }
     }
     
     if (value.toLowerCase() === 'on') {
@@ -119,6 +113,28 @@ class ButtonTarget {
         });
     }
 
+  }
+  getTargetsViaGroup(groupName) {
+    const allTargets = [];
+    const group = Lodash.find(this.configGroups, {
+      name: groupName,
+    });
+    if (group) {
+       const {
+        devices,
+        groups,
+       } = group;
+       if (devices) {
+        allTargets.push(...devices);
+       }
+       if (groups) {
+        groups.forEach((group) => {
+          const devices = fnFindGroup(group);
+          allTargets.push(...devices);
+        });
+       }
+    }
+    return allTargets;
   }
 }
 
