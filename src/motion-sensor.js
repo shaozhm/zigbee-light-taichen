@@ -22,6 +22,7 @@ class MotionTarget {
   disableSensor = false;
   keepLight = true;
   constructor(device, client) {
+    this.device = device
     this.client = client
     const {
       config,
@@ -31,7 +32,6 @@ class MotionTarget {
     const {
       delayOffTime,
     } = config;
-    this.device = device
     this.delayOffTime = delayOffTime
     this.onGroup = onGroup
     this.offGroup = offGroup

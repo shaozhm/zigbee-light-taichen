@@ -8,10 +8,14 @@ const {
 const {
   CurtainTarget
 } = require('./curtain');
+const {
+  LightTarget
+} = require('./light-sensor');
 
 class Config {
   devices = []
   curtains = []
+  lightSensors = []
   instance = null;
   constructor(config, client) {
     this.config = config;
@@ -42,6 +46,14 @@ class Config {
     return this.devices;
   }
 
+  get curtains() {
+    return this.curtains;
+  }
+
+  get lightSensors() {
+    return this.lightSensors;
+  }
+
   deviceInit(configDevice) {
     const exist = Lodash.find(this.devices, {
       name: configDevice.name,
@@ -60,6 +72,7 @@ class Config {
     const modelDetails = Lodash.find(this.configProducts, { model });
     additions.modelDetails = modelDetails;
 
+    // Subscribe the topic
     const topic = `zigbee2mqtt/${name}`;
     this.client.subscribe(`${topic}`);
     console.log(`subscribed ${topic}`);
@@ -138,7 +151,18 @@ class Config {
         bindTargets,
       }), this.client, this.configGroups);
     }
-  
+    
+    // Light Sensor
+    if (model === 'GZCGQ01LM') {
+      let lightSensor = Lodash.find(this.lightSensors, {
+        name: configDevice.name,
+      })
+      if (!lightSensor) {
+        lightSensor = new LightTarget(configDevice, this.client);
+        this.lightSensors.push(lightSensor);
+      }
+      additions.o = lightSensor;
+    }
     const device = Object.assign(configDevice, additions);
     this.devices.push(device);
     return device;

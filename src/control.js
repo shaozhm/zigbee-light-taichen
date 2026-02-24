@@ -4,6 +4,9 @@ const {
 const {
   MotionSensor,
  } = require('./motion-sensor');
+ const {
+  LightSensor,
+ } = require('./light-sensor');
 
 class Control {
   static init(topic, payload, device) {
@@ -13,6 +16,8 @@ class Control {
         return new Button(topic, payload, device);
       case 'motion-sensor':
         return new MotionSensor(topic, payload, device);
+      case 'light-sensor':
+        return new LightSensor(topic, payload, device);
       case 'door-sensor':
       default:
         return null;
