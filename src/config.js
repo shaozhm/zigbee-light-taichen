@@ -14,7 +14,9 @@ const {
 const {
   BlynkTarget
 } = require('./blynk-target');
-
+const {
+  ContactTarget
+} = require('./contact-sensor');
 class Config {
   devices = []
   curtains = []
@@ -177,6 +179,13 @@ class Config {
       }
       additions.o = lightSensor;
     }
+
+    // Contact Sensor
+    if (model === 'MCCGQ01LM') {
+      const contactSensor = new ContactTarget(configDevice, this.client, this.configGroups, this.configTargets);
+      additions.o = contactSensor;
+    }
+
     const device = Object.assign(configDevice, additions);
     this.devices.push(device);
     return device;

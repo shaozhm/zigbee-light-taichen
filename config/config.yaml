@@ -157,7 +157,6 @@ devices:
   - name: door-2
     model: MCCGQ01LM
     config:
-      default: on
       on:
         target: led-1
         action: on
