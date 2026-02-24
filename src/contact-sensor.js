@@ -82,7 +82,7 @@ class ContactTarget {
        }
        if (groups) {
         groups.forEach((group) => {
-          const devices = fnFindGroup(group);
+          const devices = this.getTargetsViaGroup(group);
           allTargets.push(...devices);
         });
        }
