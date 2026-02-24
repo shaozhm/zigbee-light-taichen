@@ -1,3 +1,4 @@
+const { _: Lodash } = require('lodash');
 const {
   Basic,
  } = require('./basic');
@@ -20,9 +21,11 @@ class Button extends Basic {
 }
 
 class ButtonTarget {
-  constructor(device, client) {
+  constructor(device, client, configGroups) {
     this.device = device
     this.client = client
+    this.configGroups = configGroups;
+
     const {
       dependDevices, // MotionTarget(motion sensors)
       bindTargets, // curtain
@@ -34,22 +37,52 @@ class ButtonTarget {
     const {
       config,
     } = this.device;
-    const configAction = config[value.toLowerCase()];
-    if (configAction) {
+    if (value && value.toLowerCase()) {
+      const configAction = config[value.toLowerCase()];
       const {
-        group,
-        action,
+        group: groupName,
+        action: actionText,
       } = configAction;
 
+      const fnFindGroup = (name) => {
+        const allDevices = [];
+        const group = Lodash.find(this.configGroups, {
+          name,
+        });
+        if (group) {
+           const {
+            devices,
+            groups,
+           } = group;
+           if (devices) {
+            allDevices.push(...devices);
+           }
+           if (groups) {
+            groups.forEach((group) => {
+              const devices = fnFindGroup(group);
+              allDevices.push(...devices);
+            });
+           }
+        }
+        return allDevices;
+      }
+      const deviceTargets = fnFindGroup(groupName);
+      deviceTargets.forEach((target) => {
+        console.log(`${target}: ${actionText}`)
+        this.client.publish(`zigbee2mqtt/${target}/set`, `{ "state": "${actionText.toUpperCase()}" }`, { qos: 0, retain: false }, (error) => {
+          if (error) {
+            console.error(error)
+          }
+        })
+      });
     }
+    
     if (value.toLowerCase() === 'on') {
       if (this.dependDevices) {
         this.dependDevices.forEach((device) => {
           const target = device.o;
           if (target) {
-            target.keepLight = true;
-            target.disableSensor = true;
-            console.log(`Disable ${target.deviceName} set to: ${target.disableSensor}`);
+            target.offSensor();
           }
         });
       }
@@ -64,7 +97,7 @@ class ButtonTarget {
         this.dependDevices.forEach((device) => {
           const target = device.o;
           if (target) {
-            target.disableSensorOff();
+            target.onSensor();
           }
         });
       }

@@ -71,6 +71,12 @@ devices:
   - name: ikea-styrbar-f-1
     model: E2001
     config:
+      on:
+        group: kitchen
+        action: on
+      off:
+        group: kitchen
+        action: off
       depends:
         - move-sensor-1
   - name: ikea-styrbar-d-1
@@ -81,6 +87,12 @@ devices:
   - name: ikea-styrbar-g-1
     model: E2001
     config:
+      on:
+        group: bathroom
+        action: on
+      off:
+        group: bathroom
+        action: off
       depends:
         - move-sensor-2
   - name: d-2

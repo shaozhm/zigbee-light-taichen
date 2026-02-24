@@ -12,21 +12,30 @@ const {
 class Config {
   devices = []
   curtains = []
+  instance = null;
   constructor(config, client) {
+    this.config = config;
     this.client = client;
     const {
       devices: configDevices,
       targets: configTargets,
-      products,
-      groups,
+      products: configProducts,
+      groups: configGroups,
     } = config;
     this.configDevices = configDevices;
     this.configTargets = configTargets;
-    this.products = products;
-    this.groups = groups;
+    this.configProducts = configProducts;
+    this.configGroups = configGroups;
     configDevices.forEach((device) => {
       this.deviceInit(device);
     });
+  }
+
+  static init(config, client) {
+    if (!this.instance) {
+      this.instance = new Config(config, client);
+    }
+    return this.instance;
   }
   
   get devices() {
@@ -48,7 +57,7 @@ class Config {
     } = configDevice;
 
     const additions = {};
-    const modelDetails = Lodash.find(this.products, { model });
+    const modelDetails = Lodash.find(this.configProducts, { model });
     additions.modelDetails = modelDetails;
 
     const topic = `zigbee2mqtt/${name}`;
@@ -64,10 +73,10 @@ class Config {
         on,
         off,
       } = targets;
-      const onGroup = Lodash.find(this.groups, {
+      const onGroup = Lodash.find(this.configGroups, {
         name: on
       });
-      const offGroup = Lodash.find(this.groups, {
+      const offGroup = Lodash.find(this.configGroups, {
         name: off
       });
 
@@ -127,7 +136,7 @@ class Config {
       additions.o = new ButtonTarget(Object.assign(configDevice, {
         dependDevices,
         bindTargets,
-      }), this.client);
+      }), this.client, this.configGroups);
     }
   
     const device = Object.assign(configDevice, additions);

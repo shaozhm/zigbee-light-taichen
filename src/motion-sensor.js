@@ -39,19 +39,12 @@ class MotionTarget {
   get deviceName() {
     return this.device?.name;
   }
-  set keepLight(value) {
-    this.keepLight = value;
+  offSensor() {
+    this.keepLight = true;
+    this.disableSensor = true;
+    console.log(`Disable ${this.device?.name} set to: ${this.disableSensor}`);
   }
-  get keepLight() {
-    return this.keepLight;
-  }
-  set disableSensor(value) {
-    this.disableSensor = value;
-  }
-  get disableSensor() {
-    return this.disableSensor;
-  }
-  disableSensorOff() {
+  onSensor() {
     const timerFunction = () => {
       if (!this.keepLight) {
         this.disableSensor = false;
