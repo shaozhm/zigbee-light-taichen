@@ -109,32 +109,71 @@ class MotionTarget {
   }
   action(value) {
     console.log(`${this.deviceName}: invoke action`);
+    const allDevices = Devices.getInstance().getDevices();
     if (!this.disableSensor) {
-      if (this.dependDevices) {
-        this.dependDevices.forEach((dependDevice) => {
-          const {
-            name,
-          } = dependDevice;
-        });
-      }
-      let devices = null;
-      let sendMesg = null;
+      let trigger = true;
       if (value) {
-        devices = this.onGroup?.devices;
-        sendMesg = '{ "state": "ON" }';
-      } else {
-        devices = this.offGroup?.devices;
-        sendMesg = '{ "state": "OFF" }';
+        trigger = this.triggerByLightSensor(this.dependDevices, allDevices);
       }
-      devices && devices.forEach((device) => {
-        console.log(`Send Topic: ${device}, Message: ${sendMesg}`);
-        this.client.publish(`zigbee2mqtt/${device}/set`, sendMesg, { qos: 0, retain: false }, (error) => {
-          if (error) {
-            console.error(error)
-          }
+      if (trigger) {
+        let devices = null;
+        let sendMesg = null;
+        if (value) {
+          devices = this.onGroup?.devices;
+          sendMesg = '{ "state": "ON" }';
+        } else {
+          devices = this.offGroup?.devices;
+          sendMesg = '{ "state": "OFF" }';
+        }
+        devices && devices.forEach((device) => {
+          console.log(`Send Topic: ${device}, Message: ${sendMesg}`);
+          this.client.publish(`zigbee2mqtt/${device}/set`, sendMesg, { qos: 0, retain: false }, (error) => {
+            if (error) {
+              console.error(error)
+            }
+          })
         })
-      })
+      }
     }
+  }
+  triggerByLightSensor(dependDevices, devices) {
+    let trigger = true;
+    if (dependDevices) {
+      dependDevices.forEach((dependDevice) => {
+        const {
+          name,
+          dependConfig,
+        } = dependDevice;
+        console.log('dependConfig',dependConfig);
+        const device = Lodash.find(devices, {
+          name,
+        });
+        // Light Sensor
+        if (device && device.model === 'GZCGQ01LM') {
+          const target = device.o;
+          if (target) {
+            const {
+              illuminance_lux
+            } = target;
+            console.log(`current lux: ${illuminance_lux}`);
+            if (dependConfig) {
+              const {
+                threshold
+              } = dependConfig;
+              if (threshold) {
+                const {
+                  lux
+                } = threshold;
+                if (!Lodash.isNil(illuminance_lux) && !Lodash.isNil(lux) && illuminance_lux >= lux) {
+                  trigger = false;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    return trigger;
   }
 }
 

@@ -150,7 +150,8 @@ devices:
       depends:
         - name: light-sensor-1
           config:
-            threshold: 115
+            threshold:
+              lux: 115
   - name: move-sensor-2
     model: RTCGQ01LM
     config: 
@@ -158,7 +159,7 @@ devices:
       targets:
         on: bathroom_auto_on
         off: bathroom
-  - name: door-2
+  - name: door-3
     model: MCCGQ01LM
     config:
       on:

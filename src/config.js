@@ -166,6 +166,7 @@ class Config {
 
     const device = Object.assign(configDevice, additions);
     devices.push(device);
+    return device;
   }
 
   dependsInit(configDepends, devices) {
@@ -173,6 +174,7 @@ class Config {
     configDepends.forEach((depend) => {
       const {
         name,
+        config: dependConfig,
       } = depend;
       let device = Lodash.find(devices, {
         name,
@@ -187,7 +189,9 @@ class Config {
         }
       }
       if (device) {
-        dependDevices.push(device);
+        dependDevices.push(Object.assign({
+          dependConfig,
+        }, device));
       }
     });
     return dependDevices;
