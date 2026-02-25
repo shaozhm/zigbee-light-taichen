@@ -50,7 +50,7 @@ devices:
     model: WXKG01LM
     config:
       binds:
-        - blynk-1
+        - name: blynk-1
   - name: button-1
     model: WXKG01LM
     config:
@@ -85,7 +85,7 @@ devices:
         group: kitchen
         action: off
       depends:
-        - move-sensor-1
+        - name: move-sensor-1
   - name: ikea-styrbar-d-1
     model: E2001
     config:
@@ -96,7 +96,7 @@ devices:
         group: main_bedroom
         action: off
       binds:
-        - curtain-1
+        - name: curtain-1
   - name: ikea-styrbar-e-1
     model: E2001
     config:
@@ -107,7 +107,7 @@ devices:
         group: second_bedroom
         action: off
       binds:
-        - curtain-2
+        - name: curtain-2
   - name: ikea-styrbar-e-2
     model: E2001
     config:
@@ -118,7 +118,7 @@ devices:
         group: second_bedroom
         action: off
       binds:
-        - curtain-2
+        - name: curtain-2
   - name: ikea-styrbar-g-1
     model: E2001
     config:
@@ -129,17 +129,17 @@ devices:
         group: bathroom
         action: off
       depends:
-        - move-sensor-2
+        - name: move-sensor-2
   - name: d-2
     model: E1524
     config:
       binds:
-        - curtain-1
+        - name: curtain-1
   - name: d-3
     model: E1524
     config:
       binds:
-        - curtain-1
+        - name: curtain-1
   - name: move-sensor-1
     model: RTCGQ01LM
     config: 
@@ -147,6 +147,10 @@ devices:
       targets:
         on: kitchen_auto_on
         off: kitchen
+      depends:
+        - name: light-sensor-1
+          config:
+            threshold: 115
   - name: move-sensor-2
     model: RTCGQ01LM
     config: 

@@ -14,6 +14,9 @@ const {
 const {
   Config
 } = require('../src/config');
+const {
+  Devices
+} = require('../src/devices');
 
 const DEFAULT_CONFIGFILE = 'config.yaml';
 const configPath = Path.join('.', 'config', DEFAULT_CONFIGFILE);
@@ -42,7 +45,8 @@ client.on('offline', function() {
 });
 
 const config = Config.init(configJson, client);
-const devices = config.devices;
+
+const devices = Devices.getInstance().getDevices();
 
 // 厕所的全局变量定义
 let door2contact = false;

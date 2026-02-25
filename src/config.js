@@ -1,6 +1,6 @@
 const { _: Lodash } = require('lodash');
 const {
-  MotionTarget
+  MotionConfig,
 } = require('./motion-sensor');
 const {
   ButtonTarget
@@ -17,8 +17,10 @@ const {
 const {
   ContactTarget
 } = require('./contact-sensor');
+const {
+  Devices
+} = require('./devices');
 class Config {
-  devices = []
   curtains = []
   lightSensors = []
   blynks = []
@@ -36,9 +38,12 @@ class Config {
     this.configTargets = configTargets;
     this.configProducts = configProducts;
     this.configGroups = configGroups;
-    configDevices.forEach((device) => {
-      this.deviceInit(device);
+    const devices = [];
+    configDevices.forEach((configDevice) => {
+      this.deviceInit(configDevice, devices);
     });
+    Devices.init(devices);
+    console.log(`Device Number: ${Devices.getInstance().getDevices().length}`);
   }
 
   static init(config, client) {
@@ -46,10 +51,6 @@ class Config {
       this.instance = new Config(config, client);
     }
     return this.instance;
-  }
-  
-  get devices() {
-    return this.devices;
   }
 
   get curtains() {
@@ -60,12 +61,12 @@ class Config {
     return this.lightSensors;
   }
 
-  deviceInit(configDevice) {
-    const exist = Lodash.find(this.devices, {
+  deviceInit(configDevice, devices) {
+    const exist = Lodash.find(devices, {
       name: configDevice.name,
     })
     if (exist) {
-      return exist;
+      return;
     }
 
     const {
@@ -85,27 +86,9 @@ class Config {
 
     // Motion Sensor
     if (model === 'RTCGQ01LM' && config) {
-      const {
-        targets,
-      } = config;
-      const {
-        on,
-        off,
-      } = targets;
-      const onGroup = Lodash.find(this.configGroups, {
-        name: on
-      });
-      const offGroup = Lodash.find(this.configGroups, {
-        name: off
-      });
-
-      // new properties
-      additions.onGroup = onGroup;
-      additions.offGroup = offGroup;
-      additions.o = new MotionTarget(Object.assign(configDevice, {
-        onGroup,
-        offGroup,
-      }), this.client);
+      const motionConfig = new MotionConfig(this.client, this, this.configGroups, this.configDevices);
+      const deviceAdditions = motionConfig.deviceInit(configDevice, devices);
+      Object.assign(additions, deviceAdditions);
     }
 
     if (modelDetails.type === 'button' && config) {
@@ -117,22 +100,17 @@ class Config {
       // Motion Sensors
       const dependDevices = [];
       if (configDepends) {
-        configDepends.forEach((depend) => {
-          const configDevice = Lodash.find(this.configDevices, {
-            name: depend
-          });
-          if (configDevice) {
-            const device = this.deviceInit(configDevice);
-            dependDevices.push(device);
-          }
-        });
+        dependDevices.push(...this.dependsInit(configDepends, devices));
       }
 
       const bindTargets = [];
       if (configBinds) {
         configBinds.forEach((bind) => {
+          const {
+            name,
+          } = bind;
           const bindTarget = Lodash.find(this.configTargets, {
-            name: bind
+            name,
           });
           // Curtains
           if (bindTarget?.model === 'ZNCLDJ12LM') {
@@ -187,8 +165,32 @@ class Config {
     }
 
     const device = Object.assign(configDevice, additions);
-    this.devices.push(device);
-    return device;
+    devices.push(device);
+  }
+
+  dependsInit(configDepends, devices) {
+    const dependDevices = [];
+    configDepends.forEach((depend) => {
+      const {
+        name,
+      } = depend;
+      let device = Lodash.find(devices, {
+        name,
+      });
+      if (!device) {
+        const configDevice = Lodash.find(this.configDevices, {
+          name,
+        });
+        if (configDevice) {
+          device = this.deviceInit(configDevice, devices);
+          devices.push(device);
+        }
+      }
+      if (device) {
+        dependDevices.push(device);
+      }
+    });
+    return dependDevices;
   }
 
   getTargetsViaGroup(groupName) {

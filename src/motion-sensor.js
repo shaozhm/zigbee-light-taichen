@@ -1,6 +1,57 @@
+const { _: Lodash } = require('lodash');
 const {
   Basic,
- } = require('./basic');
+} = require('./basic');
+const {
+  Devices
+} = require('./devices');
+class MotionConfig {
+  constructor(client, config, configGroups, configDevices) {
+    this.client = client;
+    this.config = config;
+    this.configGroups = configGroups;
+    this.configDevices = configDevices;
+  }
+  deviceInit(configDevice, devices) {
+    const {
+      name,
+      model,
+      config,
+    } = configDevice;
+    const {
+      targets: configTargets,
+      depends: configDepends,
+    } = config;
+    const {
+      on,
+      off,
+    } = configTargets;
+    const onGroup = Lodash.find(this.configGroups, {
+      name: on
+    });
+    const offGroup = Lodash.find(this.configGroups, {
+      name: off
+    });
+
+    const additions = {
+      onGroup,
+      offGroup,
+    };
+
+    if (configDepends) {
+      const dependDevices = this.config.dependsInit(configDepends, devices);
+      Object.assign(additions, {
+        dependDevices,
+      });
+    }
+
+    additions.o = new MotionTarget({
+      ...configDevice, 
+      ...additions,
+    }, this.client);
+    return additions;
+  }
+}
 
 class MotionSensor extends Basic {
   constructor(topic, payload, device) {
@@ -28,6 +79,7 @@ class MotionTarget {
       config,
       onGroup,
       offGroup,
+      dependDevices,
     } = device;
     const {
       delayOffTime,
@@ -35,6 +87,7 @@ class MotionTarget {
     this.delayOffTime = delayOffTime
     this.onGroup = onGroup
     this.offGroup = offGroup
+    this.dependDevices = dependDevices
   }
   get deviceName() {
     return this.device?.name;
@@ -55,17 +108,25 @@ class MotionTarget {
     setTimeout(timerFunction, this.delayOffTime);
   }
   action(value) {
+    console.log(`${this.deviceName}: invoke action`);
     if (!this.disableSensor) {
+      if (this.dependDevices) {
+        this.dependDevices.forEach((dependDevice) => {
+          const {
+            name,
+          } = dependDevice;
+        });
+      }
       let devices = null;
       let sendMesg = null;
       if (value) {
-        devices = this.onGroup.devices;
+        devices = this.onGroup?.devices;
         sendMesg = '{ "state": "ON" }';
       } else {
-        devices = this.offGroup.devices;
+        devices = this.offGroup?.devices;
         sendMesg = '{ "state": "OFF" }';
       }
-      devices.forEach((device) => {
+      devices && devices.forEach((device) => {
         console.log(`Send Topic: ${device}, Message: ${sendMesg}`);
         this.client.publish(`zigbee2mqtt/${device}/set`, sendMesg, { qos: 0, retain: false }, (error) => {
           if (error) {
@@ -78,6 +139,7 @@ class MotionTarget {
 }
 
 const exportFunctions = {
+  MotionConfig,
   MotionSensor,
   MotionTarget,
 };
