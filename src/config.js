@@ -3,19 +3,19 @@ const {
   MotionConfig,
 } = require('./motion-sensor');
 const {
-  ButtonTarget
+  ButtonWidget
 } = require('./button');
 const {
-  CurtainTarget
+  CurtainWidget
 } = require('./curtain');
 const {
-  LightTarget
+  LightSensorWidget
 } = require('./light-sensor');
 const {
-  BlynkTarget
-} = require('./blynk-target');
+  BlynkWidget
+} = require('./blynk');
 const {
-  ContactTarget
+  ContactWidget
 } = require('./contact-sensor');
 const {
   Devices
@@ -44,6 +44,10 @@ class Config {
     });
     Devices.init(devices);
     console.log(`Device Number: ${Devices.getInstance().getDevices().length}`);
+
+    configTargets.forEach((configTarget) => {
+      this.targetInit(configTarget);
+    });
   }
 
   static init(config, client) {
@@ -59,6 +63,10 @@ class Config {
 
   get lightSensors() {
     return this.lightSensors;
+  }
+
+  targetInit(configTarget) {
+
   }
 
   deviceInit(configDevice, devices) {
@@ -118,7 +126,7 @@ class Config {
               name: bindTarget.name,
             })
             if (!curtain) {
-              curtain = new CurtainTarget(bindTarget, this.client);
+              curtain = new CurtainWidget(bindTarget, this.client);
               this.curtains.push(curtain);
             }
             bindTargets.push(curtain);
@@ -129,7 +137,7 @@ class Config {
               name: bindTarget.name,
             })
             if (!blynk) {
-              blynk = new BlynkTarget(bindTarget, this.client);
+              blynk = new BlynkWidget(bindTarget, this.client);
               this.blynks.push(blynk);
             }
             bindTargets.push(blynk);
@@ -140,7 +148,7 @@ class Config {
       // new properies
       additions.dependDevices = dependDevices;
       additions.bindTargets = bindTargets;
-      additions.o = new ButtonTarget(Object.assign(configDevice, {
+      additions.o = new ButtonWidget(Object.assign(configDevice, {
         dependDevices,
         bindTargets,
       }), this.client, this.configGroups, this.configTargets);
@@ -152,7 +160,7 @@ class Config {
         name: configDevice.name,
       })
       if (!lightSensor) {
-        lightSensor = new LightTarget(configDevice, this.client);
+        lightSensor = new LightSensorWidget(configDevice, this.client);
         this.lightSensors.push(lightSensor);
       }
       additions.o = lightSensor;
@@ -160,7 +168,7 @@ class Config {
 
     // Contact Sensor
     if (model === 'MCCGQ01LM') {
-      const contactSensor = new ContactTarget(configDevice, this.client, this.configGroups, this.configTargets);
+      const contactSensor = new ContactWidget(configDevice, this.client, this.configGroups, this.configTargets);
       additions.o = contactSensor;
     }
 

@@ -1,0 +1,202 @@
+address: zigbeepi.local
+port: 1883
+products:
+  - model: WXKG01LM
+    vendor: Xiaomi
+    description: Mi wireless switch
+    type: button
+  - model: E2001
+    vendor: IKEA
+    description: STYRBAR remote control
+    type: button
+  - model: E1524
+    vendor: IKEA
+    description: TRADFRI remote control
+    type: button
+  - model: E1743
+    vendor: IKEA
+    description: TRADFRI on/off switch
+    type: button
+  - model: RTCGQ01LM
+    vendor: Xiaomi
+    description: Mi motion sensor
+    type: motion-sensor
+  - model: MCCGQ01LM
+    vendor: Xiaomi
+    description: Mi door and window sensor
+    type: contact-sensor
+  - model: GZCGQ01LM
+    vendor: Xiaomi
+    description: Mi light sensor
+    type: light-sensor
+  - model: LWB016
+    vendor: Philips
+    description: Hue White E26 806 lumen
+    type: light
+  - model: LTD006
+    vendor: Signify Netherlands B.V.
+    description: Hue Light
+    type: light
+  - model: ICPSHC24-10EU-IL-1
+    vendor: IKEA
+    description: TRADFRI LED driver, 10 w
+    type: light
+  - model: ZNCLDJ12LM
+    vendor: Aqara
+    description: Curtain controller B1
+    type: curtain
+targets:
+  - name: hue-bulb-b-1
+    model: LWB016
+  - name: hue-bulb-b-2
+    model: LWB016
+  - name: hue-bulb-b-3
+    model: LWB016
+  - name: hue-bulb-c-1
+    model: LWB016
+  - name: hue-bulb-c-2
+    model: LWB016
+  - name: hue-bulb-c-3
+    model: LWB016
+  - name: ikea-lightstrip-driver-1
+    model: ICPSHC24-10EU-IL-1
+  - name: ikea-lightstrip-driver-2
+    model: ICPSHC24-10EU-IL-1
+  - name: ikea-lightstrip-driver-3
+    model: ICPSHC24-10EU-IL-1
+  - name: ikea-lightstrip-driver-4
+    model: ICPSHC24-10EU-IL-1
+  - name: curtain-1
+    model: ZNCLDJ12LM
+groups:
+  - name: kitchen_auto_on
+    devices:
+      - hue-bulb-c-1
+      - hue-bulb-c-2
+      - hue-bulb-c-3
+  - name: kitchen
+    devices:
+      - hue-bulb-c-1
+      - hue-bulb-c-2
+      - hue-bulb-c-3
+      - ikea-lightstrip-driver-2
+  - name: bathroom
+    devices:
+      - ikea-lightstrip-driver-3
+  - name: bedroom
+    devices:
+      - hue-bulb-b-1
+      - hue-bulb-b-2
+      - hue-bulb-b-3
+      - ikea-lightstrip-driver-1
+  - name: door-light
+    devices:
+      - ikea-lightstrip-driver-4
+  - name: all_lights
+    groups:
+      - kitchen
+      - bathroom
+      - bedroom
+      - door-light
+devices:
+  - name: door-1
+    model: MCCGQ01LM
+    config:
+      on: 
+        group: door-light
+        action: off
+      off:
+        group: door-light
+        action: on
+  - name: button-1
+    model: WXKG01LM
+    config:
+      double: 
+        group: all_lights
+        action: off
+      triple:
+        group: all_lights
+        action: off
+      quadruple:
+        group: all_lights
+        action: off      
+  - name: button-2
+    model: WXKG01LM
+    config:
+      double: 
+        group: all_lights
+        action: off
+      triple:
+        group: all_lights
+        action: off
+      quadruple:
+        group: all_lights
+        action: off
+  - name: ikea-styrbar-c-1
+    model: E2001
+    config:
+      on:
+        group: kitchen
+        action: on
+      off:
+        group: kitchen
+        action: off
+      depends:
+        - name: move-sensor-1
+  - name: ikea-tradfri-1
+    model: E1743
+    config:
+      on:
+        group: kitchen
+        action: on
+      off:
+        group: kitchen
+        action: off
+      depends:
+        - name: move-sensor-1
+  - name: move-sensor-1
+    model: RTCGQ01LM
+    config: 
+      delayOffTime: 3000
+      targets:
+        on: kitchen_auto_on
+        off: kitchen
+  - name: ikea-styrbar-c-2
+    model: E2001
+    config:
+      on:
+        group: bathroom
+        action: on
+      off:
+        group: bathroom
+        action: off
+      depends:
+        - name: move-sensor-3
+  - name: move-sensor-3
+    model: RTCGQ01LM
+    config: 
+      delayOffTime: 3000
+      targets:
+        on: bathroom
+        off: bathroom
+  - name: ikea-styrbar-b-1
+    model: E2001
+    config:
+      on:
+        group: bedroom
+        action: on
+      off:
+        group: bedroom
+        action: off
+      binds:
+        - name: curtain-1
+  - name: b-2
+    model: E1524
+    config:
+      binds:
+        - name: curtain-1
+  - name: b-3
+    model: E1524
+    config:
+      binds:
+        - name: curtain-1

@@ -1,4 +1,4 @@
-class CurtainTarget {
+class CurtainWidget {
   lastAction = 'stop';
   constructor(target, client) {
     this.client = client
@@ -31,7 +31,7 @@ class CurtainTarget {
   }
 }
 const exportFunctions = {
-  CurtainTarget,
+  CurtainWidget,
 };
 
 module.exports = exportFunctions;

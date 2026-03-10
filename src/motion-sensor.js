@@ -45,7 +45,7 @@ class MotionConfig {
       });
     }
 
-    additions.o = new MotionTarget({
+    additions.o = new MotionWidget({
       ...configDevice, 
       ...additions,
     }, this.client);
@@ -69,7 +69,7 @@ class MotionSensor extends Basic {
   }
 }
 
-class MotionTarget {
+class MotionWidget {
   disableSensor = false;
   keepLight = true;
   constructor(device, client) {
@@ -180,7 +180,7 @@ class MotionTarget {
 const exportFunctions = {
   MotionConfig,
   MotionSensor,
-  MotionTarget,
+  MotionWidget,
 };
 
 module.exports = exportFunctions;

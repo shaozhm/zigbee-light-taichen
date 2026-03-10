@@ -17,7 +17,7 @@ class ContactSensor extends Basic {
   }
 }
 
-class ContactTarget {
+class ContactWidget {
   constructor(device, client, configGroups, configTargets) {
     this.device = device
     this.client = client
@@ -92,7 +92,7 @@ class ContactTarget {
 }
 const exportFunctions = {
   ContactSensor,
-  ContactTarget,
+  ContactWidget,
 };
 
 module.exports = exportFunctions;

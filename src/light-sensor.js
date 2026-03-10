@@ -21,7 +21,7 @@ class LightSensor extends Basic {
   }
 }
 
-class LightTarget {
+class LightSensorWidget {
   illuminance = 0
   illuminance_lux = 0
   constructor(device, client) {
@@ -46,7 +46,7 @@ class LightTarget {
 }
 const exportFunctions = {
   LightSensor,
-  LightTarget,
+  LightSensorWidget,
 };
 
 module.exports = exportFunctions;

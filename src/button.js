@@ -1,8 +1,18 @@
 const { _: Lodash } = require('lodash');
 const {
   Basic,
- } = require('./basic');
+} = require('./basic');
 
+class ButtonConfig {
+  constructor(client, config, configGroups, configDevices) {
+    this.client = client;
+    this.config = config;
+    this.configGroups = configGroups;
+    this.configDevices = configDevices;
+  }
+  deviceInit(configDevice, devices) {
+  }
+}
 class Button extends Basic {
   constructor(topic, payload, device) {
     super(topic, payload, device);
@@ -19,7 +29,7 @@ class Button extends Basic {
   }
 }
 
-class ButtonTarget {
+class ButtonWidget {
   constructor(device, client, configGroups, configTargets) {
     this.device = device
     this.client = client
@@ -41,7 +51,7 @@ class ButtonTarget {
     const {
       config,
     } = this.device;
-    if (value && value.toLowerCase() && config[value.toLowerCase()]) {
+    if (value && value.toLowerCase() && config && config[value.toLowerCase()]) {
       const configAction = config[value.toLowerCase()];
       const {
         group: groupName,
@@ -171,8 +181,9 @@ class ButtonTarget {
 }
 
 const exportFunctions = {
+  ButtonConfig,
   Button,
-  ButtonTarget,
+  ButtonWidget,
 };
 
 module.exports = exportFunctions;

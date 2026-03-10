@@ -1,5 +1,5 @@
 const blynk_send = '/home/pi/node-v16.15.0-linux-armv7l/bin/blynk-send';
-class BlynkTarget {
+class BlynkWidget {
   constructor(target, client) {
     this.client = client
     this.target = target
@@ -16,7 +16,7 @@ class BlynkTarget {
   }
 }
 const exportFunctions = {
-  BlynkTarget,
+  BlynkWidget,
 };
 
 module.exports = exportFunctions;
