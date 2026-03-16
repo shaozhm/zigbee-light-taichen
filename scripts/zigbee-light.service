@@ -9,9 +9,10 @@ ExecStart=/home/pi/node-v16.15.0-linux-armv7l/bin/node .
 WorkingDirectory=/home/pi/zigbee-light-taichen
 StandardOutput=inherit
 StandardError=inherit
-Restart=on-failure
 User=pi
 Group=pi
+Restart=always
+RestartSec=10s
 
 [Install]
 WantedBy=multi-user.target

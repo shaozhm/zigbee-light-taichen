@@ -18,8 +18,12 @@ const {
   ContactWidget
 } = require('./contact-sensor');
 const {
-  Devices
-} = require('./devices');
+  LightTarget
+} = require('./light-target');
+const {
+  Devices,
+  Targets,
+} = require('./singleton');
 class Config {
   curtains = []
   lightSensors = []
@@ -45,9 +49,13 @@ class Config {
     Devices.init(devices);
     console.log(`Device Number: ${Devices.getInstance().getDevices().length}`);
 
+    const targets = [];
     configTargets.forEach((configTarget) => {
-      this.targetInit(configTarget);
+      const target = this.targetInit(configTarget);
+      targets.push(target);
     });
+    Targets.init(targets);
+    console.log(`Targets Number: ${Targets.getInstance().getTargets().length}`);
   }
 
   static init(config, client) {
@@ -66,7 +74,28 @@ class Config {
   }
 
   targetInit(configTarget) {
+    const {
+      name,
+      model,
+    } = configTarget;
 
+    const additions = {};
+    const modelDetails = Lodash.find(this.configProducts, { model });
+    additions.modelDetails = modelDetails;
+
+    // Subscribe the topic
+    const topic = `zigbee2mqtt/${name}`;
+    this.client.subscribe(`${topic}`);
+    console.log(`subscribed ${topic}`);
+
+    // Light 
+    if (modelDetails.type === 'light') {
+      const lightTarget = new LightTarget(configTarget, this.client);
+      additions.o = lightTarget;
+    }
+  
+    const target = Object.assign(configTarget, additions);
+    return target;
   }
 
   deviceInit(configDevice, devices) {

@@ -4,7 +4,7 @@ const {
 } = require('./basic');
 const {
   Devices
-} = require('./devices');
+} = require('./singleton');
 class MotionConfig {
   constructor(client, config, configGroups, configDevices) {
     this.client = client;

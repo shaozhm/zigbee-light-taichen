@@ -16,7 +16,7 @@ const {
 } = require('../src/config');
 const {
   Devices
-} = require('../src/devices');
+} = require('../src/singleton');
 
 const DEFAULT_CONFIGFILE = 'config.yaml';
 const configPath = Path.join('.', 'config', DEFAULT_CONFIGFILE);
