@@ -130,6 +130,11 @@ devices:
         action: off
       depends:
         - name: move-sensor-2
+  - name: d-1
+    model: E1524
+    config:
+      binds:
+        - name: curtain-1
   - name: d-2
     model: E1524
     config:

@@ -188,15 +188,6 @@ devices:
       off:
         group: bedroom
         action: off
-      brightness_move_up:
-        group: bedroom
-        action: brightness_move_up
-      brightness_move_down:
-        group: bedroom
-        action: brightness_move_down
-      brightness_stop:
-        group: bedroom
-        action: brightness_stop
       binds:
         - name: curtain-1
   - name: b-2
