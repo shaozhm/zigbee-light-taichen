@@ -13,6 +13,14 @@ products:
     vendor: IKEA
     description: TRADFRI remote control
     type: button
+  - model: E1743
+    vendor: IKEA
+    description: TRADFRI on/off switch
+    type: button
+  - model: E1766
+    vendor: IKEA
+    description: TRADFRI open/close switch
+    type: button
   - model: RTCGQ01LM
     vendor: Xiaomi
     description: Mi motion sensor
@@ -40,6 +48,10 @@ products:
   - model: ZNCLDJ12LM
     vendor: Aqara
     description: Curtain controller B1
+    type: curtain
+  - model: E2102
+    vendor: IKEA
+    description: PRAKTLYSING cellular blind
     type: curtain
   - model: blynk
     vendor: blynk
@@ -75,8 +87,8 @@ devices:
       quadruple:
         group: all_lights
         action: off 
-  - name: ikea-styrbar-f-1
-    model: E2001
+  - name: f-1
+    model: E1743
     config:
       on:
         group: kitchen
@@ -86,6 +98,16 @@ devices:
         action: off
       depends:
         - name: move-sensor-1
+  - name: f-curtain-button-3
+    model: E1766
+    config:
+      binds:
+        - name: curtain-3
+  - name: f-curtain-button-4
+    model: E1766
+    config:
+      binds:
+        - name: curtain-4
   - name: ikea-styrbar-d-1
     model: E2001
     config:
@@ -119,8 +141,22 @@ devices:
         action: off
       binds:
         - name: curtain-2
-  - name: ikea-styrbar-g-1
-    model: E2001
+  - name: a-1
+    model: E1743
+    config:
+      on:
+        group: studyroom
+        action: on
+      off:
+        group: studyroom
+        action: off
+  - name: a-2
+    model: E1766
+    config:
+      binds:
+        - name: curtain-5
+  - name: g-1
+    model: E1743
     config:
       on:
         group: bathroom
@@ -216,6 +252,12 @@ targets:
     model: ZNCLDJ12LM
   - name: curtain-2
     model: ZNCLDJ12LM
+  - name: curtain-3
+    model: E2102
+  - name: curtain-4
+    model: E2102
+  - name: curtain-5
+    model: E2102
   - name: blynk-1
     model: blynk
 groups:

@@ -150,7 +150,7 @@ class Config {
             name,
           });
           // Curtains
-          if (bindTarget?.model === 'ZNCLDJ12LM') {
+          if (bindTarget?.model === 'ZNCLDJ12LM' || bindTarget?.model === 'E2102') {
             let curtain = Lodash.find(this.curtains, {
               name: bindTarget.name,
             })

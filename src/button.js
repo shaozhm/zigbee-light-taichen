@@ -118,6 +118,33 @@ class ButtonWidget {
         });
       }
     }
+    if (value && value.toLowerCase() === 'open' && this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          // 开窗帘
+          if (target.class === 'curtain') {
+            target.action('open');
+          }
+        });
+    }
+    if (value && value.toLowerCase() === 'close' && this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          // 开窗帘
+          if (target.class === 'curtain') {
+            target.action('close');
+          }
+        });
+    }
+    if (value && value.toLowerCase() === 'stop' && this.bindTargets) {
+        this.bindTargets.forEach((target) => {
+          // 开窗帘
+          if (target.class === 'curtain') {
+            target.action('stop');
+          }
+        });
+    }
+    if (value && value.toLowerCase() === 'toggle' && this.bindTargets) {
+      
+    }
     if (value && value.toLowerCase() === 'arrow_left_click' && this.bindTargets) {
         this.bindTargets.forEach((target) => {
           // 关窗帘

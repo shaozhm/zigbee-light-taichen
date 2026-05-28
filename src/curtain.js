@@ -17,17 +17,22 @@ class CurtainWidget {
     this.lastAction = value;
   }
   action(value) {
-    let actionText = 'stop';
+    let actionText = null;
     if (value === 'close' || value === 'open') {
       actionText = this.lastAction === value ? 'stop' : value;
     }
-    console.log(`${this.name}: ${actionText}`)
-    this.client.publish(`zigbee2mqtt/${this.name}/set`, `{ "state": "${actionText}" }`, { qos: 0, retain: false }, (error) => {
-      if (error) {
-        console.error(error)
-      }
-    })
-    this.lastAction = actionText;
+    if (value === 'stop') {
+      actionText = 'stop';
+    }
+    if (actionText) {
+      console.log(`${this.name}: ${actionText}`)
+      this.client.publish(`zigbee2mqtt/${this.name}/set`, `{ "state": "${actionText}" }`, { qos: 0, retain: false }, (error) => {
+        if (error) {
+          console.error(error)
+        }
+      })
+      this.lastAction = actionText;
+    }
   }
 }
 const exportFunctions = {

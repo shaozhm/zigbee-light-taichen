@@ -143,6 +143,17 @@ devices:
         action: off
       depends:
         - name: move-sensor-1
+  - name: c-1
+    model: E1743
+    config:
+      on:
+        group: kitchen
+        action: on
+      off:
+        group: kitchen
+        action: off
+      depends:
+        - name: move-sensor-1
   - name: ikea-tradfri-1
     model: E1743
     config:
@@ -172,6 +183,17 @@ devices:
         action: off
       depends:
         - name: move-sensor-3
+  - name: c-2
+    model: E1743
+    config:
+      on:
+        group: bathroom
+        action: on
+      off:
+        group: bathroom
+        action: off
+      depends:
+        - name: move-sensor-3
   - name: move-sensor-3
     model: RTCGQ01LM
     config: 
@@ -180,6 +202,17 @@ devices:
         on: bathroom
         off: bathroom
   - name: ikea-styrbar-b-1
+    model: E2001
+    config:
+      on:
+        group: bedroom
+        action: on
+      off:
+        group: bedroom
+        action: off
+      binds:
+        - name: curtain-1
+  - name: b-1
     model: E2001
     config:
       on:
@@ -200,3 +233,5 @@ devices:
     config:
       binds:
         - name: curtain-1
+  - name: light-sensor-1
+    model: GZCGQ01LM

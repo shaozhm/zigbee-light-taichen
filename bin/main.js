@@ -48,10 +48,6 @@ const config = Config.init(configJson, client);
 
 const devices = Devices.getInstance().getDevices();
 
-// 厕所的全局变量定义
-let door2contact = false;
-
-
 client.on('message', function(topic, message) {
   console.log(`[${topic}] message: `, message.toString());
   if (topic.startsWith('zigbee2mqtt')) {
